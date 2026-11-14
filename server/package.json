@@ -21,6 +21,7 @@
     "express": "^4.19.2",
     "graphql": "^16.9.0",
     "jsonwebtoken": "^8.5.1",
+    "mongodb-memory-server": "^10.1.4",
     "mongoose": "^8.4.3"
   },
   "devDependencies": {

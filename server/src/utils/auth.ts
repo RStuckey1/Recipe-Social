@@ -1,7 +1,17 @@
-import jwt from 'jsonwebtoken';
+import { Buffer } from 'node:buffer';
+import { createRequire } from 'node:module';
 import { GraphQLError } from 'graphql';
 import dotenv from 'dotenv';
+
 dotenv.config();
+
+const require = createRequire(import.meta.url);
+const bufferModule = require('buffer') as { SlowBuffer?: typeof Buffer };
+if (!bufferModule.SlowBuffer) {
+  bufferModule.SlowBuffer = Buffer;
+}
+
+const jwt = require('jsonwebtoken') as typeof import('jsonwebtoken');
 
 
 export const authenticateToken = ({ req }: any) => {
@@ -20,7 +30,7 @@ export const authenticateToken = ({ req }: any) => {
 
   // Try to verify the token
   try {
-    const { data }: any = jwt.verify(token, process.env.JWT_SECRET_KEY || '', { maxAge: '2hr' });
+    const { data }: any = jwt.verify(token, process.env.JWT_SECRET_KEY || 'mysecretshhh', { maxAge: '2hr' });
     // If the token is valid, attach the user data to the request object
     req.user = data;
   } catch (err) {
@@ -35,7 +45,7 @@ export const authenticateToken = ({ req }: any) => {
 export const signToken = (username: string, email: string, _id: unknown) => {
   // Create a payload with the user information
   const payload = { username, email, _id };
-  const secretKey: any = process.env.JWT_SECRET_KEY; // Get the secret key from environment variables
+  const secretKey: any = process.env.JWT_SECRET_KEY || 'mysecretshhh'; // Get the secret key from environment variables
 
   // Sign the token with the payload and secret key, and set it to expire in 2 hours
   return jwt.sign({ data: payload }, secretKey, { expiresIn: '2h' });
