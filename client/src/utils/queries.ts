@@ -36,6 +36,7 @@ export const QUERY_RECIPES = gql`
         username
       }
       servingSize
+      tags
     }
   }
 `;

@@ -1,12 +1,5 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Card, CardActionArea, CardContent, Chip, Stack, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import { FixedSizeList } from 'react-window';
-
-
 
 interface RecipeSummary {
   _id: string;
@@ -14,67 +7,91 @@ interface RecipeSummary {
   recipeAuthor: {
     _id: string;
     username: string;
-  }
+  };
   servingSize: string;
-  tags: string[];
+  tags?: string[];
 }
 
 interface RecipeListProps {
-  recipes: RecipeSummary[]
+  recipes: RecipeSummary[];
 }
 
-function renderRow(props: any) {
-  const { data, index } = props;
-  return (
-    <List>
-    <ListItem key={index} component="div" disablePadding alignItems="flex-start">
-
-      <Typography variant="h4">{data[index].recipeName}</Typography>
-      <Typography>by {data[index].recipeAuthor?.username}</Typography>
-      <Typography>Serving Size: {data[index].servingSize}</Typography>
-      {data[index].tags?.map((tag: string, tagIndex: number) => (
-        <Typography key={tagIndex}>{tag}</Typography>
-      ))}
-      <ListItemButton>
-        <Link
-          className="btn btn-primary btn-block btn-squared"
-          to={`/recipe/${data[index]._id}`}
-        >
-          View Recipe
-        </Link>
-      </ListItemButton>
-    </ListItem>
-    </List>
-  );
-}
-
-// WE NEED A WAY TO RETURN A LIMIT, OR ONLY DISPLAY A CERTAIN AMOUNT
-const RecipeList: React.FC<RecipeListProps> = ({ recipes }) => (
+const RecipeList = ({ recipes }: RecipeListProps) => (
   <Box
+    component="section"
+    aria-label="All recipes"
     sx={{
-      borderRadius: '5',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
+      display: 'grid',
+      gridTemplateColumns: {
+        xs: '1fr',
+        sm: 'repeat(2, minmax(0, 1fr))',
+        lg: 'repeat(3, minmax(0, 1fr))',
+      },
+      gap: { xs: 2, sm: 2.5 },
       width: '100%',
-      backgroundColor: '#BBE1C3', // Light green background
-      color: '#869D7A', // Muted green for text,
     }}
   >
-    <FixedSizeList
-      height={800}
-      width={1000}
-      itemData={recipes}
-      itemSize={46}
-      itemCount={recipes.length}
-      overscanCount={5}
-    >
-      {renderRow}
-    </FixedSizeList>
+    {recipes.map((recipe) => (
+      <Card
+        key={recipe._id}
+        variant="outlined"
+        sx={{
+          height: '100%',
+          borderColor: '#e5e3d9',
+          borderRadius: 3,
+          backgroundColor: '#fffefa',
+          transition: 'transform 160ms ease, box-shadow 160ms ease',
+          '&:hover': {
+            transform: 'translateY(-3px)',
+            boxShadow: '0 12px 28px rgba(37, 61, 50, 0.1)',
+          },
+        }}
+      >
+        <CardActionArea
+          component={Link}
+          to={`/recipe/${recipe._id}`}
+          sx={{ height: '100%', alignItems: 'stretch' }}
+        >
+          <CardContent sx={{ p: { xs: 2.25, sm: 2.75 } }}>
+            <Stack spacing={1.25}>
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{
+                  color: '#253d32',
+                  fontFamily: 'Georgia, serif',
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  overflowWrap: 'anywhere',
+                }}
+              >
+                {recipe.recipeName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                By {recipe.recipeAuthor?.username || 'Gastro Book cook'}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#47594b' }}>
+                Serves {recipe.servingSize}
+              </Typography>
+              {recipe.tags && recipe.tags.length > 0 && (
+                <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap">
+                  {recipe.tags.map((tag) => (
+                    <Chip key={tag} label={tag} size="small" variant="outlined" />
+                  ))}
+                </Stack>
+              )}
+              <Typography
+                variant="body2"
+                sx={{ pt: 0.5, color: '#3e684e', fontWeight: 700 }}
+              >
+                View recipe →
+              </Typography>
+            </Stack>
+          </CardContent>
+        </CardActionArea>
+      </Card>
+    ))}
   </Box>
 );
 
 export default RecipeList;
-

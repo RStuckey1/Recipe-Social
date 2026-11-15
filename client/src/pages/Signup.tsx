@@ -42,14 +42,33 @@ const Signup = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#BBE1C3',
+        minHeight: '70vh',
+        px: 2,
+        py: { xs: 4, sm: 7 },
       }}
     >
-      <Card sx={{ maxWidth: 500, width: '100%', backgroundColor: '#A7CDBD' }}>
+      <Card
+        variant="outlined"
+        sx={{
+          maxWidth: 500,
+          width: '100%',
+          overflow: 'hidden',
+          borderColor: '#e5e3d9',
+          borderRadius: 3,
+          backgroundColor: '#fffefa',
+        }}
+      >
         <CardHeader
-          title="Sign Up"
-          sx={{ backgroundColor: '#869D7A', color: '#FFFFFF', textAlign: 'center', padding: 2 }}
+          title="Create your account"
+          subheader="Start building your personal cookbook."
+          sx={{
+            backgroundColor: '#253d32',
+            color: '#fffdf8',
+            textAlign: 'center',
+            py: 2.5,
+            '& .MuiCardHeader-subheader': { color: 'rgba(255,253,248,0.72)' },
+            '& .MuiCardHeader-title': { fontFamily: 'Georgia, serif', fontWeight: 700 },
+          }}
         />
         <CardContent>
           {data ? (
@@ -65,81 +84,58 @@ const Signup = () => {
                 fullWidth
                 label="Your Username"
                 name="username"
+                required
                 value={formState.username}
                 onChange={handleChange}
                 margin="normal"
                 variant="outlined"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#91785D',
-                    color: '#FFFFFF',
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#FFFFFF',
-                  },
-                }}
               />
               <TextField
                 fullWidth
                 label="Your Email"
                 name="email"
                 type="email"
+                required
                 value={formState.email}
                 onChange={handleChange}
                 margin="normal"
                 variant="outlined"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#91785D',
-                    color: '#FFFFFF',
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#FFFFFF',
-                  },
-                }}
               />
               <TextField
                 fullWidth
                 label="Password"
                 name="password"
                 type="password"
+                required
                 value={formState.password}
                 onChange={handleChange}
                 margin="normal"
                 variant="outlined"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#91785D',
-                    color: '#FFFFFF',
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#FFFFFF',
-                  },
-                }}
               />
               <Button
                 fullWidth
                 type="submit"
                 variant="contained"
                 sx={{
-                  marginTop: 2,
-                  backgroundColor: '#8B5D33',
-                  '&:hover': { backgroundColor: '#FF964F' },
+                  mt: 2,
+                  py: 1.25,
+                  borderRadius: 99,
+                  textTransform: 'none',
                 }}
               >
-                Submit
+                Create account
               </Button>
             </form>
           )}
 
           {error && (
-            <Typography
-              variant="body2"
-              sx={{ marginTop: 2, padding: 2, backgroundColor: '#FF964F', color: '#FFFFFF' }}
-            >
+            <Typography role="alert" variant="body2" sx={{ mt: 2, p: 2, color: 'error.main' }}>
               {error.message}
             </Typography>
           )}
+          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 2.5 }}>
+            Already a member? <Link to="/login">Log in</Link>
+          </Typography>
         </CardContent>
       </Card>
     </Box>

@@ -2,8 +2,10 @@ import { Buffer } from 'node:buffer';
 import { createRequire } from 'node:module';
 import { GraphQLError } from 'graphql';
 import dotenv from 'dotenv';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.env') });
 
 const require = createRequire(import.meta.url);
 const bufferModule = require('buffer') as { SlowBuffer?: typeof Buffer };

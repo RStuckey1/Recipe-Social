@@ -9,21 +9,21 @@ import { Container, TextField, Button, Typography, Card, CardContent, Alert } fr
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#869D7A',
+      main: '#3e684e',
     },
     secondary: {
-      main: '#FF964F',
+      main: '#c66b3d',
     },
     background: {
-      default: '#BBE1C3',
-      paper: '#A7CDBD',
+      default: '#f7f5ef',
+      paper: '#fffefa',
     },
     error: {
-      main: '#8B5D33',
+      main: '#a43e32',
     },
     text: {
-      primary: '#91785D',
-      secondary: '#8B5D33',
+      primary: '#26372e',
+      secondary: '#68756b',
     },
   },
 });
@@ -58,17 +58,30 @@ const Login = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="sm" style={{ marginTop: '2rem' }}>
-        <Card>
+      <Container maxWidth="sm" sx={{ py: { xs: 4, sm: 7 }, minHeight: '70vh' }}>
+        <Card
+          variant="outlined"
+          sx={{ overflow: 'hidden', borderColor: '#e5e3d9', borderRadius: 3 }}
+        >
           <Typography
             variant="h4"
             component="div"
-            style={{ backgroundColor: theme.palette.primary.main, color: '#FFF', padding: '1rem' }}
+            sx={{
+              backgroundColor: '#253d32',
+              color: '#fffdf8',
+              px: 3,
+              py: 2.5,
+              fontFamily: 'Georgia, serif',
+              fontWeight: 700,
+            }}
             align="center"
           >
-            Login
+            Welcome back
           </Typography>
           <CardContent>
+            <Typography color="text.secondary" align="center" sx={{ mb: 2 }}>
+              Log in to find your saved recipes.
+            </Typography>
             {data ? (
               <Typography variant="body1" align="center">
                 Success! Enjoy using the <Link to="/">GastroBook</Link>.
@@ -100,20 +113,22 @@ const Login = () => {
                 <Button
                   type="submit"
                   variant="contained"
-                  color="primary"
                   fullWidth
-                  style={{ marginTop: '1rem' }}
+                  sx={{ mt: 2, py: 1.25, borderRadius: 99, textTransform: 'none' }}
                 >
-                  Submit
+                  Log in
                 </Button>
               </form>
             )}
 
             {error && (
-              <Alert severity="error" style={{ marginTop: '1rem' }}>
+              <Alert severity="error" sx={{ mt: 2 }}>
                 {error.message}
               </Alert>
             )}
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2.5 }}>
+              New to Gastro Book? <Link to="/signup">Create an account</Link>
+            </Typography>
           </CardContent>
         </Card>
       </Container>

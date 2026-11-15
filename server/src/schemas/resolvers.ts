@@ -58,7 +58,7 @@ const resolvers = {
       throw new AuthenticationError('Could not authenticate user.');
     },
     recipes: async () => {
-      return await Recipe.find().populate('recipeAuthor').limit(20);
+      return await Recipe.find().sort({ _id: -1 }).populate('recipeAuthor').limit(20);
       //Recipe.find({_id: {$ne:houseUser._id}}) -- This is for if we want to exclude house recipes down the road
     },
     recipe: async (_parent: any, { recipeId }: RecipeArgs) => {

@@ -16,22 +16,28 @@ import { Box } from '@mui/material';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#869D7A', // Olive green
+      main: '#3e684e',
     },
     secondary: {
-      main: '#FF964F', // Orange
+      main: '#c66b3d',
     },
     background: {
-      default: '#BBE1C3', // Light green
-      paper: '#A7CDBD', // Muted green
+      default: '#f7f5ef',
+      paper: '#fffefa',
     },
     text: {
-      primary: '#91785D', // Taupe
-      secondary: '#8B5D33', // Brown
+      primary: '#26372e',
+      secondary: '#68756b',
     },
   },
   typography: {
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: '"Segoe UI", "Helvetica Neue", Arial, sans-serif',
+    button: {
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
   },
 });
 
@@ -66,13 +72,16 @@ function App() {
         <Box
           sx={{
             backgroundColor: 'background.default',
-           
+            color: 'text.primary',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <Header />
-          <div className="container">
+          <Box component="main" sx={{ flex: 1, width: '100%' }}>
             <Outlet />
-          </div>
+          </Box>
           <Footer />
         </Box>
       </ThemeProvider>

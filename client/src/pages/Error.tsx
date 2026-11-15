@@ -1,5 +1,5 @@
-import { useRouteError } from 'react-router-dom';
-import { Box, Typography, Paper } from '@mui/material';
+import { Alert, Button, Container, Paper, Typography } from '@mui/material';
+import { Link, useRouteError } from 'react-router-dom';
 
 interface RouteError {
   statusText?: string;
@@ -8,72 +8,38 @@ interface RouteError {
 
 export default function ErrorPage() {
   const error = useRouteError() as RouteError;
-  console.error(error);
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#BBE1C3', // Light green background
-        color: '#869D7A', // Muted green for text
-        padding: 4,
-      }}
-    >
+    <Container maxWidth="sm" sx={{ py: { xs: 5, sm: 8 } }}>
       <Paper
-        elevation={3}
+        variant="outlined"
         sx={{
+          p: { xs: 3, sm: 5 },
           textAlign: 'center',
-          padding: 4,
-          borderRadius: 2,
-          boxShadow: 3,
-          backgroundColor: '#A7CDBD', // Muted aqua green background for the card
-          color: '#869D7A' // Muted green for text
+          borderColor: '#e5e3d9',
+          borderRadius: 4,
+          backgroundColor: '#fffefa',
         }}
       >
         <Typography
-          variant="h1"
-          sx={{
-            fontSize: '2.5rem',
-            fontWeight: 700,
-            color: '#FF964F', // Bright orange for the title
-            marginBottom: 2
-          }}
+          component="h1"
+          variant="h3"
+          sx={{ mb: 1, color: '#253d32', fontFamily: 'Georgia, serif', fontWeight: 700 }}
         >
-          Oh No!!
+          A little kitchen detour
         </Typography>
-        <Typography
-          variant="body1"
-          sx={{
-            fontSize: '1.2rem',
-            marginBottom: 2,
-            color: '#91785D' // Soft brown for the text
-          }}
-        >
-          It looks like there was a grease fire in the kitchen.
+        <Typography color="text.secondary" sx={{ mb: 3 }}>
+          We couldn’t find the page you were looking for.
         </Typography>
-        <Typography
-          variant="body1"
-          sx={{
-            fontSize: '1.2rem',
-            marginBottom: 2,
-            color: '#91785D' // Soft brown for the text
-          }}
-        >
-          Excuse me while we put this fire out!!
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            fontStyle: 'italic',
-            color: '#8B5D33' // Rich brown for error details
-          }}
-        >
-          {error.statusText || error.message}
-        </Typography>
+        {(error.statusText || error.message) && (
+          <Alert severity="error" sx={{ mb: 3, textAlign: 'left' }}>
+            {error.statusText || error.message}
+          </Alert>
+        )}
+        <Button component={Link} to="/" variant="contained" sx={{ borderRadius: 99, px: 3 }}>
+          Back to recipes
+        </Button>
       </Paper>
-    </Box>
+    </Container>
   );
 }
