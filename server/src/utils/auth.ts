@@ -1,10 +1,10 @@
-import jwt from 'jsonwebtoken';
+import { jwtVerify, SignJWT } from 'jose';
 import { GraphQLError } from 'graphql';
 import dotenv from 'dotenv';
 dotenv.config();
 
 
-export const authenticateToken = ({ req }: any) => {
+export const authenticateToken = async ({ req }: any) => {
   // Allows token to be sent via req.body, req.query, or headers
   let token = req.body.token || req.query.token || req.headers.authorization;
 
@@ -20,9 +20,13 @@ export const authenticateToken = ({ req }: any) => {
 
   // Try to verify the token
   try {
-    const { data }: any = jwt.verify(token, process.env.JWT_SECRET_KEY || '', { maxAge: '2hr' });
+    const secretKey = new TextEncoder().encode(process.env.JWT_SECRET_KEY || '');
+    const { payload } = await jwtVerify(token, secretKey, {
+      algorithms: ['HS256'],
+      maxTokenAge: '2h',
+    });
     // If the token is valid, attach the user data to the request object
-    req.user = data;
+    req.user = payload.data;
   } catch (err) {
     // If the token is invalid, log an error message
     console.log('Invalid token');
@@ -32,13 +36,17 @@ export const authenticateToken = ({ req }: any) => {
   return req;
 };
 
-export const signToken = (username: string, email: string, _id: unknown) => {
+export const signToken = async (username: string, email: string, _id: unknown) => {
   // Create a payload with the user information
   const payload = { username, email, _id };
-  const secretKey: any = process.env.JWT_SECRET_KEY; // Get the secret key from environment variables
+  const secretKey = new TextEncoder().encode(process.env.JWT_SECRET_KEY || '');
 
   // Sign the token with the payload and secret key, and set it to expire in 2 hours
-  return jwt.sign({ data: payload }, secretKey, { expiresIn: '2h' });
+  return new SignJWT({ data: payload })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('2h')
+    .sign(secretKey);
 };
 
 export class AuthenticationError extends GraphQLError {

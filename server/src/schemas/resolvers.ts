@@ -71,7 +71,7 @@ const resolvers = {
       const user = await User.create({ ...input });
     
       // Sign a token with the user's information
-      const token = signToken(user.username, user.email, user._id);
+      const token = await signToken(user.username, user.email, user._id);
     
       // Return the token and the user
       return { token, user };
@@ -95,7 +95,7 @@ const resolvers = {
       }
     
       // Sign a token with the user's information
-      const token = signToken(user.username, user.email, user._id);
+      const token = await signToken(user.username, user.email, user._id);
     
       // Return the token and the user
       return { token, user };
