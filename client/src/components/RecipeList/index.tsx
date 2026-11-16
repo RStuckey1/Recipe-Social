@@ -46,7 +46,7 @@ const RecipeList = ({ recipes }: RecipeListProps) => {
           <div className="recipe-card-content">
             <div className="recipe-card-byline">
               <span className="avatar">{recipe.recipeAuthor?.username?.charAt(0).toUpperCase() || 'G'}</span>
-              <span>by <strong>{recipe.recipeAuthor?.username || 'Gastro Book cook'}</strong></span>
+              <span>by <strong>{recipe.recipeAuthor?.username || 'RecipeSocial cook'}</strong></span>
             </div>
             <Link className="recipe-card-title" to={`/recipe/${recipe._id}`}>{recipe.recipeName}</Link>
             {recipe.recipeDescription && <p className="recipe-card-description">{recipe.recipeDescription}</p>}

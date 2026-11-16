@@ -14,9 +14,9 @@ const Header = () => {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link className="brand" to="/" aria-label="Gastro Book home">
+        <Link className="brand" to="/" aria-label="RecipeSocial home">
           <span className="brand-mark"><AutoAwesomeIcon /></span>
-          <span className="brand-name">gastro<span>book</span><small>Recipes worth sharing</small></span>
+          <span className="brand-name">Recipe<span>Social</span><small>Recipes worth sharing</small></span>
         </Link>
         <nav className="header-nav" aria-label="Main navigation">
           <Link to="/">Discover</Link>

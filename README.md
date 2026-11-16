@@ -1,4 +1,4 @@
-# Gastro Book
+# RecipeSocial
     An online recipe sharing service that allows users to create and share recipes with other avid lovers of cooking and all things food related!
 
 ## Description
@@ -31,7 +31,7 @@ What are the steps required to install your project? Provide a step-by-step desc
 
 ## Usage
 
-Can be used to create and share recipes with other users of Gastro Book! (in future planning)
+Can be used to create and share recipes with other users of RecipeSocial! (in future planning)
 
 
     ```md

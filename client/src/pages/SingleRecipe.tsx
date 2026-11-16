@@ -22,7 +22,7 @@ const SingleRecipe = () => {
           {recipe.tags?.[0] && <span className="eyebrow">{recipe.tags[0]}</span>}
           <h1>{recipe.recipeName}</h1>
           <p>{recipe.recipeDescription}</p>
-          <div className="detail-author">Shared by <strong>{recipe.recipeAuthor?.username || 'Gastro Book cook'}</strong> · {recipe.servingSize}</div>
+          <div className="detail-author">Shared by <strong>{recipe.recipeAuthor?.username || 'RecipeSocial cook'}</strong> · {recipe.servingSize}</div>
         </div>
         <div className="detail-hero-image">
           {recipe.imageUrl ? <img src={recipe.imageUrl} alt={recipe.recipeName} /> : <div className="image-placeholder"><RestaurantMenuOutlinedIcon /></div>}

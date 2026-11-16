@@ -35,7 +35,7 @@ const RecipeSocialActions = ({ recipeId, voteCount, hasVoted }: RecipeSocialActi
     setMessage('');
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'A recipe from Gastro Book', url });
+        await navigator.share({ title: 'A recipe from RecipeSocial', url });
       } else {
         await navigator.clipboard.writeText(url);
         setMessage('Recipe link copied!');
