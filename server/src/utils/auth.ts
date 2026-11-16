@@ -3,6 +3,30 @@ import { GraphQLError } from 'graphql';
 import dotenv from 'dotenv';
 dotenv.config();
 
+const normalizeUserId = (value: unknown): string | undefined => {
+  if (typeof value === 'string' && /^[a-f\d]{24}$/i.test(value)) {
+    return value;
+  }
+  if (!value || typeof value !== 'object' || !('buffer' in value)) {
+    return undefined;
+  }
+
+  const buffer = (value as { buffer?: unknown }).buffer;
+  if (!buffer || typeof buffer !== 'object') {
+    return undefined;
+  }
+
+  const bytes = Object.keys(buffer)
+    .sort((left, right) => Number(left) - Number(right))
+    .map((key) => (buffer as Record<string, unknown>)[key]);
+  if (bytes.length !== 12 || !bytes.every(
+    (byte) => typeof byte === 'number' && Number.isInteger(byte) && byte >= 0 && byte <= 255
+  )) {
+    return undefined;
+  }
+
+  return (bytes as number[]).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+};
 
 export const authenticateToken = async ({ req }: any) => {
   // Allows token to be sent via req.body, req.query, or headers
@@ -25,8 +49,12 @@ export const authenticateToken = async ({ req }: any) => {
       algorithms: ['HS256'],
       maxTokenAge: '2h',
     });
-    // If the token is valid, attach the user data to the request object
-    req.user = payload.data;
+    const userData = payload.data as { username: string; email: string; _id: unknown };
+    const userId = normalizeUserId(userData?._id);
+    if (!userId) {
+      throw new Error('Token contains an invalid user ID.');
+    }
+    req.user = { ...userData, _id: userId };
   } catch (err) {
     // If the token is invalid, log an error message
     console.log('Invalid token');
@@ -37,8 +65,7 @@ export const authenticateToken = async ({ req }: any) => {
 };
 
 export const signToken = async (username: string, email: string, _id: unknown) => {
-  // Create a payload with the user information
-  const payload = { username, email, _id };
+  const payload = { username, email, _id: String(_id) };
   const secretKey = new TextEncoder().encode(process.env.JWT_SECRET_KEY || '');
 
   // Sign the token with the payload and secret key, and set it to expire in 2 hours

@@ -18,7 +18,7 @@
 
 ## Installation
 
-What are the steps required to install your project? Provide a step-by-step description of how to get the development environment running.
+Install the project dependencies, configure `MONGODB_URI` and `JWT_SECRET_KEY` in `server/.env`, then run `npm run start:dev`. The development command compiles and watches the server before starting the client.
 
 ## Features
 
