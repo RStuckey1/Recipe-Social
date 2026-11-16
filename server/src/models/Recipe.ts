@@ -10,6 +10,8 @@ interface IRecipe extends Document {
   ingredients: string[];
   instructions: string[];
   tags: string[];
+  imageUrl: string;
+  votes: Schema.Types.ObjectId[];
 }
 
 // Define the schema for the Recipe document
@@ -54,7 +56,15 @@ const recipeSchema = new Schema<IRecipe>(
       required: false,
       unique: false,
       trim: true,
-    }]
+    }],
+    imageUrl: {
+      type: String,
+      default: '',
+    },
+    votes: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }],
   }
 );
 

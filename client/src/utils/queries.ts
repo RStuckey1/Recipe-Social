@@ -21,6 +21,8 @@ export const GET_USER = gql`
         recipeName
         servingSize
         tags
+        imageUrl
+        voteCount
       }
     }
   }
@@ -36,6 +38,11 @@ export const QUERY_RECIPES = gql`
         username
       }
       servingSize
+      recipeDescription
+      tags
+      imageUrl
+      voteCount
+      hasVoted
     }
   }
 `;
@@ -54,6 +61,9 @@ export const QUERY_RECIPE = gql`
       ingredients
       instructions
       tags
+      imageUrl
+      voteCount
+      hasVoted
     }
   }
 `;
@@ -69,6 +79,8 @@ export const GET_ME = gql`
         recipeName
         servingSize
         tags
+        imageUrl
+        voteCount
       }
     }
   }

@@ -16,22 +16,22 @@ import { Box } from '@mui/material';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#869D7A', // Olive green
+      main: '#315f46',
     },
     secondary: {
-      main: '#FF964F', // Orange
+      main: '#df764e',
     },
     background: {
-      default: '#BBE1C3', // Light green
-      paper: '#A7CDBD', // Muted green
+      default: '#faf8f3',
+      paper: '#ffffff',
     },
     text: {
-      primary: '#91785D', // Taupe
-      secondary: '#8B5D33', // Brown
+      primary: '#24352b',
+      secondary: '#6e786f',
     },
   },
   typography: {
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: 'Inter, "Segoe UI", sans-serif',
   },
 });
 
@@ -63,14 +63,9 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <ThemeProvider theme={theme}>
-        <Box
-          sx={{
-            backgroundColor: 'background.default',
-           
-          }}
-        >
+        <Box className="app-shell" sx={{ backgroundColor: 'background.default' }}>
           <Header />
-          <div className="container">
+          <div className="app-content">
             <Outlet />
           </div>
           <Footer />

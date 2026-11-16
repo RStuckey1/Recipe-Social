@@ -16,6 +16,9 @@ const typeDefs = `
     ingredients: [String]!
     instructions: [String]!
     tags: [String]
+    imageUrl: String
+    voteCount: Int!
+    hasVoted: Boolean!
   }
 
   input RecipeInput {
@@ -26,6 +29,7 @@ const typeDefs = `
     ingredients: [String]
     instructions: [String]
     tags: [String]
+    imageUrl: String
   }
 
   input UserInput {
@@ -52,6 +56,7 @@ const typeDefs = `
     login(email: String!, password: String!): Auth
     addRecipe(input: RecipeInput!): User
     removeRecipe(recipeId: ID!): User
+    toggleRecipeVote(recipeId: ID!): Recipe
   }
 `;
 

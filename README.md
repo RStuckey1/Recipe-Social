@@ -24,8 +24,10 @@ What are the steps required to install your project? Provide a step-by-step desc
 
 - Creating and logging in with a custom user
 - Viewing many online recipes for your favorite meals
-- Creating and/or deleting recipes
-- Saving recipes for future viewing
+- Creating and deleting recipes from a personal cookbook
+- Adding an optional food photo to a recipe
+- Sharing recipe links and voting on community favorites
+- Browsing recipes with responsive search and category filters
 
 ## Usage
 

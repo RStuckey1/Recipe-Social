@@ -23,7 +23,7 @@ const startApolloServer = async () => {
   const app = express();
 
   app.use(express.urlencoded({ extended: false }));
-  app.use(express.json());
+  app.use(express.json({ limit: '8mb' }));
 
   app.use('/graphql', expressMiddleware(server as any,
     {

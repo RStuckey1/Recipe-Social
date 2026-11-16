@@ -1,269 +1,225 @@
-import { Navigate, useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@apollo/client';
-import { createTheme, ThemeProvider, Typography, Box, Divider, Paper, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery } from '@apollo/client';
+import { Dialog } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RestaurantMenuOutlinedIcon from '@mui/icons-material/RestaurantMenuOutlined';
 import { ADD_RECIPE, REMOVE_RECIPE } from '../utils/mutations';
-import { GET_USER, GET_ME } from '../utils/queries';
+import { GET_ME } from '../utils/queries';
 import Auth from '../utils/auth';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#869D7A', // Olive green
-    },
-    secondary: {
-      main: '#FF964F', // Orange
-    },
-    background: {
-      default: '#BBE1C3', // Light green
-      paper: '#A7CDBD', // Muted green
-    },
-    text: {
-      primary: '#91785D', // Taupe
-      secondary: '#8B5D33', // Brown
-    },
-  },
-  typography: {
-    fontFamily: 'Arial, sans-serif',
-  },
-});
+interface RecipeForm {
+  recipeName: string;
+  recipeDescription: string;
+  servingSize: string;
+  ingredients: string;
+  instructions: string;
+  tags: string;
+  imageUrl: string;
+}
 
-const Profile = () => {
-  const { username: userParam } = useParams();
-  const navigate = useNavigate(); // Hook for navigation
+const emptyForm: RecipeForm = {
+  recipeName: '',
+  recipeDescription: '',
+  servingSize: '',
+  ingredients: '',
+  instructions: '',
+  tags: '',
+  imageUrl: '',
+};
 
-  const { loading, data } = useQuery(userParam ? GET_USER : GET_ME, {
-    variables: { username: userParam },
-  });
-
-  const [open, setOpen] = useState(false);
-
-  interface RecipeDetails {
-    recipeName: string;
-    recipeDescription: string;
-    servingSize: string;
-    ingredients: string;
-    instructions: string;
-    tags: string[];
-  }
-
-  const [recipeDetails, setRecipeDetails] = useState<RecipeDetails>({
-    recipeName: '',
-    recipeDescription: '',
-    servingSize: '',
-    ingredients: '',
-    instructions: '',
-    tags: [],
-  });
-
-  const [addRecipe] = useMutation(ADD_RECIPE, { refetchQueries: [{ query: GET_ME }] });
-  const [removeRecipe] = useMutation(REMOVE_RECIPE, { refetchQueries: [{ query: GET_ME }] });
-
-  const user = data?.me || data?.user || {};
-
-  if (Auth.loggedIn() && Auth.getProfile().data.username === userParam) {
-    return <Navigate to="/profile" />;
-  }
-
-  if (loading) {
-    return (
-      <ThemeProvider theme={theme}>
-        <Typography variant="h6" color="text.secondary">
-          Loading...
-        </Typography>
-      </ThemeProvider>
-    );
-  }
-
-  if (!user?.username) {
-    return (
-      <ThemeProvider theme={theme}>
-        <Typography variant="h6" color="text.primary" align="center">
-          You need to be logged in to see this. Use the navigation links above to
-          sign up or log in!
-        </Typography>
-      </ThemeProvider>
-    );
-  }
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const handleSubmit = async () => {
-    if (!recipeDetails.recipeName || !recipeDetails.recipeDescription || !recipeDetails.servingSize || !recipeDetails.ingredients.length || !recipeDetails.instructions.length) {
-      alert('Please fill in all fields');
+const imageFileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onerror = () => reject(new Error('The image could not be read.'));
+  reader.onload = () => {
+    if (typeof reader.result !== 'string') {
+      reject(new Error('The selected image is not valid.'));
       return;
     }
+
+    const image = new Image();
+    image.onerror = () => reject(new Error('The selected image could not be opened.'));
+    image.onload = () => {
+      const maxDimension = 1200;
+      const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const context = canvas.getContext('2d');
+      if (!context) {
+        reject(new Error('Your browser could not process this image.'));
+        return;
+      }
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    image.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+const splitItems = (value: string) => value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean);
+
+const Profile = () => {
+  const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [form, setForm] = useState<RecipeForm>(emptyForm);
+  const [formError, setFormError] = useState('');
+  const { loading, error, data } = useQuery(GET_ME, { skip: !Auth.loggedIn() });
+  const [addRecipe, { loading: adding }] = useMutation(ADD_RECIPE, {
+    refetchQueries: [{ query: GET_ME }],
+  });
+  const [removeRecipe] = useMutation(REMOVE_RECIPE, {
+    refetchQueries: [{ query: GET_ME }],
+  });
+  const user = data?.me;
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setFormError('');
+    try {
+      const imageUrl = await imageFileToDataUrl(file);
+      setForm((current) => ({ ...current, imageUrl }));
+    } catch (imageError) {
+      setFormError(imageError instanceof Error ? imageError.message : 'The image could not be added.');
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFormError('');
     try {
       await addRecipe({
         variables: {
           input: {
-            recipeName: recipeDetails.recipeName,
-            recipeDescription: recipeDetails.recipeDescription,
-            servingSize: recipeDetails.servingSize,
-            ingredients: recipeDetails.ingredients.split(', ').map((ingredient: string) => ingredient),
-            instructions: recipeDetails.instructions.split(', ').map((instruction: string) => instruction).filter(Boolean),
-            tags: recipeDetails.tags.filter(Boolean),
+            recipeName: form.recipeName.trim(),
+            recipeDescription: form.recipeDescription.trim(),
+            servingSize: form.servingSize.trim(),
+            ingredients: splitItems(form.ingredients),
+            instructions: splitItems(form.instructions),
+            tags: splitItems(form.tags),
+            imageUrl: form.imageUrl,
           },
         },
       });
-
-      setRecipeDetails({
-        recipeName: '',
-        recipeDescription: '',
-        servingSize: '',
-        ingredients: '',
-        instructions: '',
-        tags: [],
-      });
-      handleClose();
-    } catch (err) {
-      console.error(err);
+      setForm(emptyForm);
+      setDialogOpen(false);
+    } catch (submitError) {
+      setFormError(submitError instanceof Error ? submitError.message : 'Your recipe could not be saved.');
     }
   };
 
   const handleDelete = async (recipeId: string) => {
     try {
-      await removeRecipe({
-        variables: { recipeId },
-      });
-    } catch (err) {
-      console.error("Error deleting recipe", err);
+      await removeRecipe({ variables: { recipeId } });
+    } catch (removeError) {
+      setFormError(removeError instanceof Error ? removeError.message : 'The recipe could not be deleted.');
     }
   };
 
-  const handleViewRecipe = (recipeId: string) => {
-    navigate(`/recipe/${recipeId}`); // Navigate to the recipe details page
-  };
+  if (!Auth.loggedIn()) {
+    return (
+      <main className="profile-page">
+        <div className="profile-empty">
+          <h2>Your kitchen is waiting</h2>
+          <p>Log in to manage your recipes and share something with the community.</p>
+          <button className="button button-primary" type="button" onClick={() => navigate('/login')}>Log in</button>
+        </div>
+      </main>
+    );
+  }
+  if (loading) return <main className="profile-page"><div className="loading-state">Loading your kitchen...</div></main>;
+  if (error) return <main className="profile-page"><div className="empty-state"><h3>Your recipes couldn’t load</h3><p>{error.message}</p></div></main>;
+
+  const recipes = user?.recipes || [];
 
   return (
-    <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          height: '100vh',
-          width: '200vh',
-          backgroundColor: '#BBE1C3',
-          color: '#869D7A',
-        }}>
-        <Paper elevation={3} sx={{ backgroundColor: 'background.paper' }}>
-          <Typography variant="h4" color="text.primary" gutterBottom>
-            Viewing {userParam ? `${user.username}'s` : 'your'} profile.
-          </Typography>
+    <main className="profile-page">
+      <section className="profile-heading">
+        <div>
+          <span className="eyebrow">Your personal cookbook</span>
+          <h1>Welcome to your kitchen, {user?.username}.</h1>
+          <p>Keep your favorites close and share a little inspiration with the community.</p>
+        </div>
+        <button className="button button-primary" type="button" onClick={() => { setFormError(''); setDialogOpen(true); }}>
+          <AddIcon fontSize="small" /> Add a recipe
+        </button>
+      </section>
 
-          <Typography variant="h6" color="text.primary" gutterBottom>
-            Your Recipes
-          </Typography>
+      <div className="section-heading">
+        <div><h2>Your recipes</h2><p>{recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'} in your cookbook</p></div>
+      </div>
+      {recipes.length ? (
+        <div className="profile-list">
+          {recipes.map((recipe: {
+            _id: string;
+            recipeName: string;
+            recipeDescription?: string;
+            imageUrl?: string;
+          }) => (
+            <article className="profile-recipe" key={recipe._id}>
+              <div className="profile-recipe-image">
+                {recipe.imageUrl ? <img src={recipe.imageUrl} alt="" /> : <RestaurantMenuOutlinedIcon />}
+              </div>
+              <div>
+                <h3>{recipe.recipeName}</h3>
+                <p>{recipe.recipeDescription || 'A recipe from your kitchen'}</p>
+              </div>
+              <div className="profile-recipe-actions">
+                <button className="text-button" type="button" onClick={() => navigate(`/recipe/${recipe._id}`)}>View recipe</button>
+                <button className="text-button danger" type="button" onClick={() => handleDelete(recipe._id)}>Delete</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="profile-empty">
+          <h2>Your cookbook starts here</h2>
+          <p>Add your first recipe, then share it with cooks across the community.</p>
+          <button className="button button-primary" type="button" onClick={() => setDialogOpen(true)}>Add your first recipe</button>
+        </div>
+      )}
+      {formError && !dialogOpen && <p className="form-error" role="alert">{formError}</p>}
 
-          {user.recipes && user.recipes.length > 0 ? (
-            user.recipes.map((recipe: any) => (
-              <Paper key={recipe._id} sx={{ p: 2, marginBottom: 2 }}>
-                <Typography variant="h6" color="text.secondary">
-                  {recipe.recipeName}
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  {recipe.recipeDescription}
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => handleDelete(recipe._id)}
-                >
-                  Delete
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => handleViewRecipe(recipe._id)}
-                  sx={{ ml: 1 }}
-                >
-                  View Recipe
-                </Button>
-              </Paper>
-            ))
-          ) : (
-            <Typography variant="body1" color="text.secondary">
-              You have no recipes yet.
-            </Typography>
-          )}
-
-          {!userParam && (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleOpen}
-            >
-              Add Recipe
-            </Button>
-          )}
-
-          <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Add Recipe</DialogTitle>
-            <DialogContent>
-              <TextField
-                label="Recipe Name"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={recipeDetails.recipeName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipeDetails({ ...recipeDetails, recipeName: e.target.value })}
-              />
-              <TextField
-                label="Recipe Description"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={recipeDetails.recipeDescription}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipeDetails({ ...recipeDetails, recipeDescription: e.target.value })}
-              />
-              <TextField
-                label="Serving Size"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={recipeDetails.servingSize}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipeDetails({ ...recipeDetails, servingSize: e.target.value })}
-              />
-              <TextField
-                label="Instructions (comma separated)"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={recipeDetails.instructions}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipeDetails({ ...recipeDetails, instructions: e.target.value })}
-              />
-              <TextField
-                label="Tags (comma separated)"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={recipeDetails.tags.join(', ')}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipeDetails({ ...recipeDetails, tags: e.target.value.split(',').map((tag: string) => tag.trim()) })}
-              />
-              <TextField
-                label="Ingredients (comma separated)"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={recipeDetails.ingredients}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipeDetails({ ...recipeDetails, ingredients: e.target.value })}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose} color="secondary">
-                Cancel
-              </Button>
-              <Button onClick={handleSubmit} color="primary">
-                Add Recipe
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Paper>
-
-        <Divider sx={{ my: 3 }} />
-      </Box>
-    </ThemeProvider>
+      <Dialog className="recipe-dialog" open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+        <form className="recipe-form" onSubmit={handleSubmit}>
+          <h2>Share a recipe</h2>
+          <p>Pass along something delicious from your kitchen.</p>
+          <label>Recipe name
+            <input required value={form.recipeName} onChange={(event) => setForm({ ...form, recipeName: event.target.value })} placeholder="Sunday tomato pasta" />
+          </label>
+          <label>A little about it
+            <textarea required value={form.recipeDescription} onChange={(event) => setForm({ ...form, recipeDescription: event.target.value })} placeholder="The story or flavor that makes it special..." />
+          </label>
+          <label>Servings
+            <input required value={form.servingSize} onChange={(event) => setForm({ ...form, servingSize: event.target.value })} placeholder="Serves 4" />
+          </label>
+          <label>Ingredients <span>Separate items with commas or new lines.</span>
+            <textarea required value={form.ingredients} onChange={(event) => setForm({ ...form, ingredients: event.target.value })} placeholder={'2 tbsp olive oil\n3 cloves garlic'} />
+          </label>
+          <label>Instructions <span>Put each step on a new line.</span>
+            <textarea required value={form.instructions} onChange={(event) => setForm({ ...form, instructions: event.target.value })} placeholder="Warm the olive oil..." />
+          </label>
+          <label>Tags <span>Optional: weeknight, vegetarian, dessert...</span>
+            <input value={form.tags} onChange={(event) => setForm({ ...form, tags: event.target.value })} placeholder="Weeknight, vegetarian" />
+          </label>
+          <label>Add a food photo <span>Optional — a photo makes your recipe shine.</span>
+            <div className="upload-control">
+              <div className="upload-preview">
+                {form.imageUrl ? <img src={form.imageUrl} alt="Recipe preview" /> : <RestaurantMenuOutlinedIcon />}
+              </div>
+              <input type="file" accept="image/*" onChange={handleImageChange} />
+            </div>
+          </label>
+          {formError && <div className="form-error" role="alert">{formError}</div>}
+          <div className="dialog-actions">
+            <button className="text-button" type="button" onClick={() => setDialogOpen(false)}>Cancel</button>
+            <button className="button button-primary" type="submit" disabled={adding}>{adding ? 'Sharing...' : 'Share recipe'}</button>
+          </div>
+        </form>
+      </Dialog>
+    </main>
   );
 };
 

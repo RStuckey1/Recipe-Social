@@ -47,6 +47,16 @@ export const REMOVE_RECIPE = gql`
   }
 `;
 
+export const TOGGLE_RECIPE_VOTE = gql`
+  mutation toggleRecipeVote($recipeId: ID!) {
+    toggleRecipeVote(recipeId: $recipeId) {
+      _id
+      voteCount
+      hasVoted
+    }
+  }
+`;
+
 // export const REMOVE_COMMENT = gql`
 //   mutation RemoveComment($recipeId: ID!, $commentId: ID!) {
 //     removeComment(recipeId: $recipeId, commentId: $commentId) {

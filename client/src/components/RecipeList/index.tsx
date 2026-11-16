@@ -1,80 +1,73 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import { FixedSizeList } from 'react-window';
+import RestaurantMenuOutlinedIcon from '@mui/icons-material/RestaurantMenuOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import RecipeSocialActions from '../RecipeSocialActions';
 
-
-
-interface RecipeSummary {
+export interface RecipeSummary {
   _id: string;
   recipeName: string;
-  recipeAuthor: {
-    _id: string;
-    username: string;
-  }
+  recipeAuthor?: { _id: string; username: string };
+  recipeDescription?: string;
   servingSize: string;
-  tags: string[];
+  tags?: string[];
+  imageUrl?: string;
+  voteCount?: number;
+  hasVoted?: boolean;
 }
 
 interface RecipeListProps {
-  recipes: RecipeSummary[]
+  recipes: RecipeSummary[];
 }
 
-function renderRow(props: any) {
-  const { data, index } = props;
+const RecipeList = ({ recipes }: RecipeListProps) => {
+  if (!recipes.length) {
+    return (
+      <div className="empty-state">
+        <span className="empty-state-icon"><RestaurantMenuOutlinedIcon /></span>
+        <h3>No recipes just yet</h3>
+        <p>Be the first to share something delicious with the community.</p>
+        <Link className="button button-primary" to="/profile">Add the first recipe</Link>
+      </div>
+    );
+  }
+
   return (
-    <List>
-    <ListItem key={index} component="div" disablePadding alignItems="flex-start">
-
-      <Typography variant="h4">{data[index].recipeName}</Typography>
-      <Typography>by {data[index].recipeAuthor?.username}</Typography>
-      <Typography>Serving Size: {data[index].servingSize}</Typography>
-      {data[index].tags?.map((tag: string, tagIndex: number) => (
-        <Typography key={tagIndex}>{tag}</Typography>
+    <div className="recipe-grid">
+      {recipes.map((recipe) => (
+        <article className="recipe-card" key={recipe._id}>
+          <Link className="recipe-card-image" to={`/recipe/${recipe._id}`} aria-label={`View ${recipe.recipeName}`}>
+            {recipe.imageUrl ? (
+              <img src={recipe.imageUrl} alt={recipe.recipeName} loading="lazy" />
+            ) : (
+              <span className="image-placeholder"><RestaurantMenuOutlinedIcon /></span>
+            )}
+            {recipe.tags?.[0] && <span className="image-tag">{recipe.tags[0]}</span>}
+          </Link>
+          <div className="recipe-card-content">
+            <div className="recipe-card-byline">
+              <span className="avatar">{recipe.recipeAuthor?.username?.charAt(0).toUpperCase() || 'G'}</span>
+              <span>by <strong>{recipe.recipeAuthor?.username || 'Gastro Book cook'}</strong></span>
+            </div>
+            <Link className="recipe-card-title" to={`/recipe/${recipe._id}`}>{recipe.recipeName}</Link>
+            {recipe.recipeDescription && <p className="recipe-card-description">{recipe.recipeDescription}</p>}
+            <div className="recipe-card-meta">
+              <span><AccessTimeOutlinedIcon fontSize="inherit" /> {recipe.servingSize || 'A shared favorite'}</span>
+            </div>
+            {recipe.tags && recipe.tags.length > 1 && (
+              <div className="tag-row">
+                {recipe.tags.slice(1, 3).map((tag) => <span className="recipe-tag" key={tag}>{tag}</span>)}
+              </div>
+            )}
+            <RecipeSocialActions
+              recipeId={recipe._id}
+              voteCount={recipe.voteCount || 0}
+              hasVoted={Boolean(recipe.hasVoted)}
+            />
+          </div>
+        </article>
       ))}
-      <ListItemButton>
-        <Link
-          className="btn btn-primary btn-block btn-squared"
-          to={`/recipe/${data[index]._id}`}
-        >
-          View Recipe
-        </Link>
-      </ListItemButton>
-    </ListItem>
-    </List>
+    </div>
   );
-}
-
-// WE NEED A WAY TO RETURN A LIMIT, OR ONLY DISPLAY A CERTAIN AMOUNT
-const RecipeList: React.FC<RecipeListProps> = ({ recipes }) => (
-  <Box
-    sx={{
-      borderRadius: '5',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      width: '100%',
-      backgroundColor: '#BBE1C3', // Light green background
-      color: '#869D7A', // Muted green for text,
-    }}
-  >
-    <FixedSizeList
-      height={800}
-      width={1000}
-      itemData={recipes}
-      itemSize={46}
-      itemCount={recipes.length}
-      overscanCount={5}
-    >
-      {renderRow}
-    </FixedSizeList>
-  </Box>
-);
+};
 
 export default RecipeList;
-

@@ -32,6 +32,7 @@ interface AddRecipeArgs {
     ingredients: string[];
     instructions: string[];
     tags: string[];
+    imageUrl?: string;
   }
 }
 
@@ -127,6 +128,31 @@ const resolvers = {
         { new: true }
       ).populate('recipes');
     },
+    toggleRecipeVote: async (_parent: any, { recipeId }: RecipeArgs, context: any) => {
+      if (!context.user) {
+        throw new AuthenticationError('You must be logged in to vote.');
+      }
+
+      const recipe = await Recipe.findById(recipeId);
+      if (!recipe) {
+        throw new Error('Recipe not found.');
+      }
+
+      const userId = context.user._id;
+      const alreadyVoted = recipe.votes.some((vote) => vote.toString() === userId.toString());
+      if (alreadyVoted) {
+        recipe.votes = recipe.votes.filter((vote) => vote.toString() !== userId.toString());
+      } else {
+        recipe.votes.push(userId);
+      }
+      await recipe.save();
+      return recipe.populate('recipeAuthor');
+    },
+  },
+  Recipe: {
+    voteCount: (recipe: any) => recipe.votes?.length ?? 0,
+    hasVoted: (recipe: any, _args: any, context: any) =>
+      Boolean(context.user && recipe.votes?.some((vote: any) => vote.toString() === context.user._id.toString())),
   },
 };
 

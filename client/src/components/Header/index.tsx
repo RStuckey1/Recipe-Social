@@ -1,129 +1,44 @@
-import { type MouseEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AddIcon from '@mui/icons-material/Add';
 import Auth from '../../utils/auth';
-import { useNavigate } from 'react-router-dom';
-
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-import logo from '../../assets/logo_final.png';
-
-const theme = createTheme({
-    palette: {
-        primary: {
-            main: '#869D7A', // Olive green
-        },
-        secondary: {
-            main: '#FF964F', // Orange
-        },
-        background: {
-            default: '#BBE1C3', // Light green
-            paper: '#A7CDBD', // Muted green
-        },
-        text: {
-            primary: '#91785D', // Taupe
-            secondary: '#8B5D33', // Brown
-        },
-    },
-    typography: {
-        fontFamily: 'Arial, sans-serif',
-
-    },
-});
 
 const Header = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const username = Auth.loggedIn() ? Auth.getProfile().data.username : '';
 
-    const logout = (event: MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        Auth.logout();
-    };
+  const logout = () => {
+    Auth.logout();
+  };
 
-    return (
-        <ThemeProvider theme={theme}>
-            <AppBar position="static">
-
-                <Toolbar
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box>
-                            <Typography variant="h1" sx={{ textDecoration: 'none', textcolor: "secondary" }}>
-                                Gastro Book
-                            </Typography>
-                            <Typography variant="subtitle1" sx={{ fontStyle: 'italic', marginTop: '0.5rem' }}>
-                                The Easiest Way to Save your Recipes. Even Your Mom Will Love It!
-                            </Typography>
-                        </Box>
-                        <img
-                            src={logo}
-                            alt="Gastro Book Logo"
-                            style={{ height: '125px', width: '200px', marginLeft: '1rem' }}
-                        />
-                    </Box>
-                    <Box>
-                        {Auth.loggedIn() ? (
-                            <>
-                                <Button
-                                    onClick={() => navigate('/profile')}
-                                    color="secondary"
-                                    variant="contained"
-
-                                    href="/profile"
-                                    sx={{ margin: '0 0.5rem' }}
-                                >
-                                    {Auth.getProfile().data.username}'s Profile
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-
-                                    onClick={logout}
-                                    sx={{ margin: '0 0.5rem' }}
-                                >
-                                    Logout
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-
-                                    href="/" //THIS IS WRONG ROUTE
-                                    sx={{ margin: '0 0.5rem' }}
-                                >
-                                    Go to EXPO(main page)
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-
-                                    href="/login"
-                                    sx={{ margin: '0 0.5rem' }}
-                                >
-                                    Login
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-
-                                    href="/signup"
-                                    sx={{ margin: '0 0.5rem' }}
-                                >
-                                    Signup
-                                </Button>
-                            </>
-                        )}
-                    </Box>
-                </Toolbar>
-            </AppBar>
-        </ThemeProvider>
-    );
+  return (
+    <header className="site-header">
+      <div className="header-inner">
+        <Link className="brand" to="/" aria-label="Gastro Book home">
+          <span className="brand-mark"><AutoAwesomeIcon /></span>
+          <span className="brand-name">gastro<span>book</span><small>Recipes worth sharing</small></span>
+        </Link>
+        <nav className="header-nav" aria-label="Main navigation">
+          <Link to="/">Discover</Link>
+          {Auth.loggedIn() ? (
+            <>
+              <Link to="/profile">My kitchen</Link>
+              <button className="header-user" type="button" onClick={() => navigate('/profile')}>
+                <span className="avatar avatar-small">{username.charAt(0).toUpperCase()}</span>
+                <span>{username}</span>
+              </button>
+              <button className="header-login" type="button" onClick={logout}>Log out</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">Log in</Link>
+              <Link className="button button-primary header-cta" to="/signup"><AddIcon fontSize="small" /> Join the table</Link>
+            </>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
 };
-
 
 export default Header;
