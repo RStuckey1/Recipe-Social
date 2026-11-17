@@ -1,14 +1,12 @@
-import { Recipe } from '../models/index.js'; // REMOVED USER
+import { Recipe, User } from '../models/index.js';
 import process from 'process';
 
 const cleanDB = async (): Promise<void> => {
   try {
     await Recipe.deleteMany({});
     console.log('Recipe collection cleaned.');
-
-    // NOT DELETING BECAUSE OF HOUSEUSER
-    // await User.deleteMany({});
-    // console.log('User collection cleaned.');
+    await User.updateMany({}, { $set: { recipes: [] } });
+    console.log('User recipe lists cleaned.');
 
   } catch (err) {
     console.error('Error cleaning collections:', err);

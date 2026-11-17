@@ -18,7 +18,7 @@
 
 ## Installation
 
-Install the project dependencies, configure `MONGODB_URI` and `JWT_SECRET_KEY` in `server/.env`, then run `npm run start:dev`. The development command compiles and watches the server before starting the client.
+Install the project dependencies, configure `MONGODB_URI` and `JWT_SECRET_KEY` in `server/.env`, then run `npm run start:dev`. The development command compiles and watches the server before starting the client. To seed the database, set `SEED_USER_PASSWORD` in `server/.env`, then run `npm run build` and `npm run seed`. The sample usernames are `recipe_cook_1` through `recipe_cook_8`, and all eight use the configured seed password. Seeding deletes the current recipes before inserting the seed set.
 
 ## Features
 

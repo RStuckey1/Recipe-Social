@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Types } from 'mongoose';
 
 // THIS FILE IS FOR SEEDING PURPOSES ONLY, NEED TO REMOVE null and empty "" in ingredients if run again on starter file
 
@@ -19,7 +18,6 @@ interface OriginalRecipe {
 
 interface TransformedRecipe {
     recipeName: string;
-    recipeAuthor: Types.ObjectId;
     recipeDescription: string;
     servingSize: string;
     ingredients: string[];
@@ -33,7 +31,6 @@ async function editRecipeJSON(inFilePath: string, outFilePath: string) {
 
         const transformedRecipes: TransformedRecipe[] = recipes.map(recipe => ({
             recipeName: recipe.Name,
-            recipeAuthor: new Types.ObjectId('67525f4951192ac6fa6a5e9b'),
             recipeDescription: recipe.Description ?? "No description available.",
             servingSize: '2-4',
             ingredients: recipe.Ingredients,
